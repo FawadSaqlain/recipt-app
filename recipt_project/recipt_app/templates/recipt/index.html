@@ -1,0 +1,113 @@
+{% extends "recipt/layout.html" %}
+
+{% block body %}
+<div>
+    <div id="receipt-content">
+        {% if not customer_name %}
+        <h3>Here is your's receipt by {{ request.user.first_name }} {{ request.user.last_name }}</h3>
+        {% else %}
+        <h3>Here is {{ customer_name }}'s receipt by {{ request.user.first_name }} {{ request.user.last_name }}</h3>
+        {% endif %}
+        <h6 class="receipt-date" style="margin-left: -275px;margin-top: -20px;">{{ now }}</h6>
+
+        <div id="index_outer_div" class="receipt-details">
+            <div>
+                <ol>
+                    <br>
+                    {% if names %}
+                    <h3>Name</h3>
+                    {% endif %}
+                    {% for name in names %}
+                    <li style="margin-left: 15px;">{{ name }}</li>
+                    <br>
+                    {% empty %}
+                    <h1>No items added</h1>
+                    {% endfor %}
+                </ol>
+            </div>
+
+            <div class="receipt-section">
+                <br>
+                {% if quantities %}
+                <h3>Quantity</h3>
+                {% endif %}
+                {% for quantity in quantities %}
+                {{ quantity }}
+                <br><br>
+                {% endfor %}
+            </div>
+
+            <div class="receipt-section">
+                <br>
+                {% if prices %}
+                <h3>Price</h3>
+                {% endif %}
+                {% for price in prices %}
+                {{ price }}
+                <br><br>
+                {% endfor %}
+            </div>
+
+            <div class="receipt-section">
+                <br>
+                {% if prices %}
+                X
+                <br><br>
+                {% endif %}
+            </div>
+
+            <div class="receipt-section">
+                <br>
+                {% if prices %}
+                <h4>Total</h4>
+                {% endif %}
+                {% for quantity_price in quantities_prices %}
+                {{ quantity_price }}
+                <br><br>
+                {% endfor %}
+            </div>
+
+            <div class="receipt-actions">
+                <br><br>
+                {% for id in range_5 %}
+                <a href="{% url 'recipt:dele' id %}" class="delete-button">
+                    <img src="https://icon-library.com/images/icon-remove/icon-remove-18.jpg" alt="DEL"
+                        style="width: 15px; height: 20px; margin-bottom: 10px; margin-right: 10px;">
+                </a>
+                <a href="{% url 'recipt:edit' id %}" class="edit-button">
+                    <img src="https://th.bing.com/th/id/OIP.P6trHImFdjGgSXQBU7_sagHaHa?rs=1&pid=ImgDetMain" alt="EDIT"
+                        style="width: 15px; height: 20px; margin-bottom: 10px; margin-right: 10px;">
+                </a>
+                <br>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <h4>Total Price: {{ total_price }}</h4>
+        </div>
+        <br>
+    </div>
+
+    <div class="actions">
+        <a href="{% url 'recipt:new_receipt' %}" class="action-button">New Receipt</a>
+        <a href="{% url 'recipt:add' %}" class="action-button">Add New Item</a>
+        <button onclick="printReceipt()" class="action-button print-button">Print Receipt</button>
+    </div>
+
+    <script>
+        function printReceipt() {
+            // Hide edit and delete buttons for printing
+            document.querySelectorAll('.delete-button').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.edit-button').forEach(el => el.style.display = 'none');
+
+            // Print the page
+            window.print();
+
+            // Restore the visibility of the hidden elements
+            document.querySelectorAll('.delete-button').forEach(el => el.style.display = 'inline');
+            document.querySelectorAll('.edit-button').forEach(el => el.style.display = 'inline');
+        }
+    </script>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "recipt/layout.html" %}
+{% block body %}
+<div>
+    <form action="{% url 'recipt:add' %}" method="post">
+        {% csrf_token %}
+        <h1>Please add details</h1>
+
+        {% if not customer_form.customer_name.value %}
+        <div class="form-group">
+            <label for="id_customer_name">Customer Name (optional):</label>
+            {{ customer_form.customer_name }}
+        </div>
+        {% endif %}
+
+        {{ form }}
+        <input type="submit" value="Add Item" style="width: fit-content; height: fit-content; background-color: brown; color: white; padding: 5px; margin-top: 7px; border-radius: 2px; border: 1px solid rgb(0, 0, 0);">
+    </form>
+    
+    <a href="{% url 'recipt:index' %}">
+        <button style="width: fit-content; height: fit-content; background-color: brown; color: white; padding: 5px; margin-top: -25px; border-radius: 2px; border: 1px solid rgb(0, 0, 0); float: right;">
+            Your receipt
+        </button>
+    </a>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Check if the customer name field is visible
+        if (document.querySelector("#id_customer_name")) {
+            // Focus on the customer name field if visible
+            document.getElementById("id_customer_name").focus();
+        } else {
+            // Focus on the product name field otherwise
+            document.getElementById("id_name").focus();
+        }
+    });
+</script>
+{% endblock %}

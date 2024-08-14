@@ -1,0 +1,95 @@
+/* Reset default margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Center the entire page content */
+body {
+  min-height: 100vh;
+  background-image: url("https://th.bing.com/th/id/OIP.oJnD-qE_AcmVVeoB9YnPrAHaFj?rs=1&pid=ImgDetMain");
+  background-size: cover;
+  background-repeat: no-repeat;
+  font-family: Arial, sans-serif;
+}
+
+/* Header styling */
+header {
+  width: 100%;
+  height: 100px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding-top: 30px;
+  padding-bottom: 30px;
+  color: aliceblue;
+}
+
+/* Centered container */
+#outerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#container {
+  width: fit-content;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: medium;
+  font-weight: bold;
+}
+
+/* Receipt details section */
+.receipt-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.receipt-section {
+  margin: 10px;
+}
+
+.receipt-date {
+  float: right;
+}
+
+.receipt-actions {
+  margin-top: 10px;
+}
+.delete-button, .edit-button {
+  display: inline-block;
+  width: 15px;  /* Match the width of the image */
+  height: 20px; /* Match the height of the image */
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+.action-button {
+  color: brown;
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+.print-button {
+  margin-right: 0;
+}
+
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #receipt-content, #receipt-content * {
+    visibility: visible;
+  }
+  #receipt-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}

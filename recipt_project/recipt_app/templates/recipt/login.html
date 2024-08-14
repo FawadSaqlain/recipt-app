@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'recipt_css/style.css' %}" />
+
+    <link rel="icon" type="image/x-icon"
+        href="https://th.bing.com/th/id/OIG1.y_2amRAytZhrAjPsZA6Y?w=173&h=173&c=6&r=0&o=5&pid=ImgGn"
+        alt="https://th.bing.com/th/id/OIG1.y_2amRAytZhrAjPsZA6Y?w=173&h=173&c=6&r=0&o=5&pid=ImgGn">
+    <title>B U G S</title>
+</head>
+
+<body>
+    <header>
+        <h1>Bhatti Union General Store</h1>
+    </header>
+    <br>
+    <div id="outerContainer" >
+        <div id="container">
+            {% if message %}
+            <p>{{ message }}</p>
+            {% endif %}
+            <form method="POST">
+                {% csrf_token %}
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username" value="{{ username }}">
+                <br>
+                <br>
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password">
+                <br>
+                <br>
+                <br>
+                <button style="margin-left: 100px; padding: 10px;" type="submit"><strong>Login</strong></button>
+            </form>
+    </div>
+    </div>
+</body>
+
+</html>
