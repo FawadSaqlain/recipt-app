@@ -1,0 +1,20 @@
+{% extends "recipt/layout.html" %}
+
+{% block body %}
+<div>
+    <form action="{% url 'recipt:edit_customer' customer_name %}" method="post">
+        {% csrf_token %}
+        <h1>Edit Customer Name</h1>
+        {% if customer_form %}
+        {{ customer_form }}
+        {% endif %}
+        <input type="submit" value="Update Name" style="background-color: brown; color: white; padding: 5px;margin-top: 30px;">
+    </form>
+
+    <a href="{% url 'recipt:index' %}">
+        <button style="background-color: brown; color: white; padding: 5px; float: right;margin-top: -25px;">
+            Back to Receipt
+        </button>
+    </a>
+</div>
+{% endblock %}

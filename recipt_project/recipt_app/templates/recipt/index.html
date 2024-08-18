@@ -4,11 +4,11 @@
 <div>
     <div id="receipt-content">
         {% if not customer_name %}
-        <h3>Here is your's receipt by {{ request.user.first_name }} {{ request.user.last_name }}</h3>
+        <h3>Here is your receipt by {{ request.user.first_name }} {{ request.user.last_name }}</h3>
         {% else %}
         <h3>Here is {{ customer_name }}'s receipt by {{ request.user.first_name }} {{ request.user.last_name }}</h3>
         {% endif %}
-        <h6 class="receipt-date" style="margin-left: -275px;margin-top: -20px;">{{ now }}</h6>
+        <h6 class="receipt-date" style="margin-top: -20px;">{{ now }}</h6>
 
         <div id="index_outer_div" class="receipt-details">
             <div>
@@ -74,7 +74,7 @@
                     <img src="https://icon-library.com/images/icon-remove/icon-remove-18.jpg" alt="DEL"
                         style="width: 15px; height: 20px; margin-bottom: 10px; margin-right: 10px;">
                 </a>
-                <a href="{% url 'recipt:edit' id %}" class="edit-button">
+                <a href="{% url 'recipt:edit_product' id %}" class="edit-button">
                     <img src="https://th.bing.com/th/id/OIP.P6trHImFdjGgSXQBU7_sagHaHa?rs=1&pid=ImgDetMain" alt="EDIT"
                         style="width: 15px; height: 20px; margin-bottom: 10px; margin-right: 10px;">
                 </a>
@@ -93,6 +93,12 @@
         <a href="{% url 'recipt:new_receipt' %}" class="action-button">New Receipt</a>
         <a href="{% url 'recipt:add' %}" class="action-button">Add New Item</a>
         <button onclick="printReceipt()" class="action-button print-button">Print Receipt</button>
+        <!-- Example button/link in HTML template -->
+<a href="{% url 'recipt:edit_customer' customer_name %}" class="edit-button">
+    <img src="https://th.bing.com/th/id/OIP.P6trHImFdjGgSXQBU7_sagHaHa?rs=1&pid=ImgDetMain" alt="EDIT"
+        style="width: 15px; height: 20px; margin-bottom: 10px; margin-right: 10px;">
+</a>
+
     </div>
 
     <script>

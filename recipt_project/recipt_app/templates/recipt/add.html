@@ -1,21 +1,32 @@
 {% extends "recipt/layout.html" %}
+
 {% block body %}
 <div>
-    <form action="{% url 'recipt:add' %}" method="post">
+    <form action="{% if is_editing %}{% url 'recipt:edit_product' id %}{% else %}{% url 'recipt:add' %}{% endif %}" method="post">
         {% csrf_token %}
-        <h1>Please add details</h1>
-
-        {% if not customer_form.customer_name.value %}
-        <div class="form-group">
-            <label for="id_customer_name">Customer Name (optional):</label>
-            {{ customer_form.customer_name }}
-        </div>
+        <!-- Dynamic heading based on whether you are adding or editing an item -->
+        <h1>
+            {% if is_editing %}
+                Please edit details
+            {% else %}
+                Please add details
+            {% endif %}
+        </h1>
+        
+        {% if not request.session.customer_name %}
+            <!-- Show the customer name field only if it is not already set -->
+            {% if form_customer %}
+                {{ form_customer.as_p }}
+            {% endif %}
         {% endif %}
-
-        {{ form }}
-        <input type="submit" value="Add Item" style="width: fit-content; height: fit-content; background-color: brown; color: white; padding: 5px; margin-top: 7px; border-radius: 2px; border: 1px solid rgb(0, 0, 0);">
+        
+        {% if form %}
+            {{ form.as_p }}
+        {% endif %}
+        
+        <input type="submit" style="width: fit-content; height: fit-content; background-color: brown; color: white; padding: 5px; margin-top: 7px; border-radius: 2px; border: 1px solid rgb(0, 0, 0);">
     </form>
-    
+
     <a href="{% url 'recipt:index' %}">
         <button style="width: fit-content; height: fit-content; background-color: brown; color: white; padding: 5px; margin-top: -25px; border-radius: 2px; border: 1px solid rgb(0, 0, 0); float: right;">
             Your receipt
@@ -25,13 +36,16 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Check if the customer name field is visible
-        if (document.querySelector("#id_customer_name")) {
-            // Focus on the customer name field if visible
-            document.getElementById("id_customer_name").focus();
-        } else {
+        // Focus on the product name field if the customer name field is hidden
+        const productNameField = document.getElementById("id_name");
+        const customerNameField = document.getElementById("id_customer_name");
+
+        if (customerNameField && !customerNameField.closest("form").querySelector(".hidden")) {
+            // Focus on the customer name field if it's visible
+            customerNameField.focus();
+        } else if (productNameField) {
             // Focus on the product name field otherwise
-            document.getElementById("id_name").focus();
+            productNameField.focus();
         }
     });
 </script>
