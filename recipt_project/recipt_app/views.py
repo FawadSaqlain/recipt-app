@@ -54,27 +54,18 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("recipt:login"))
 
-    if "names" not in request.session:
-        request.session["names"] = []
-    if "prices" not in request.session:
-        request.session["prices"] = []
-    if "quantities" not in request.session:
-        request.session["quantities"] = []
-    if "quantities_prices" not in request.session:
-        request.session["quantities_prices"] = []
+    if "products" not in request.session:
+        request.session["products"] = []  # 2D list to store [name, quantity, price, quantity_price]
     if "total_price" not in request.session:
         request.session["total_price"] = 0
     if "customer_name" not in request.session:
         request.session["customer_name"] = None
 
     return render(request, 'recipt/index.html', {
-        "names": request.session["names"],
-        "prices": request.session["prices"],
-        "quantities": request.session["quantities"],
-        "quantities_prices": request.session["quantities_prices"],
+        "products": request.session["products"],
         "total_price": request.session["total_price"],
         "customer_name": request.session["customer_name"],
-        'range_5': range(len(request.session["names"])),
+        'range_5': range(len(request.session["products"])),
         'now': datetime.now()
     })
 
@@ -84,31 +75,26 @@ def add(request):
     if request.method == 'POST':
         form = NewDataForm(request.POST)
         form_customer = CustomerNameForm(request.POST)
-        if form.is_valid() :
+        if form.is_valid():
             name = form.cleaned_data['name']
             price = form.cleaned_data['price']
             quantity = form.cleaned_data['quantity']
-            request.session["names"].append(name)
-            request.session["prices"].append(price)
-            request.session["quantities"].append(quantity)
-            request.session['quantities_prices'].append(price * quantity)
-            request.session['total_price'] += price * quantity
+            quantity_price = price * quantity
+            request.session["products"].append([name, quantity, price, quantity_price])
+            request.session['total_price'] += quantity_price
             if form_customer.is_valid():
                 customer_name = form_customer.cleaned_data['customer_name']
-                request.session["customer_name"]=customer_name
+                request.session["customer_name"] = customer_name
             # return redirect('recipt:index')  # Redirect after adding
         else:
-            return render(request, 'recipt/add.html', {'form': form,'form_customer':form_customer})
-    return render(request, 'recipt/add.html', {"form": NewDataForm(),'form_customer':CustomerNameForm()})
+            return render(request, 'recipt/add.html', {'form': form, 'form_customer': form_customer})
+    return render(request, 'recipt/add.html', {"form": NewDataForm(), 'form_customer': CustomerNameForm()})
 
 def new_receipt(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("recipt:login"))
 
-    request.session["names"] = []
-    request.session["prices"] = []
-    request.session["quantities"] = []
-    request.session["quantities_prices"] = []
+    request.session["products"] = []  # Reset 2D product list
     request.session["total_price"] = 0
     request.session["customer_name"] = None  # Reset customer name
 
@@ -119,14 +105,13 @@ def dele(request, id):
         return HttpResponseRedirect(reverse("recipt:login"))
 
     try:
-        request.session["names"].pop(id)
-        request.session["prices"].pop(id)
-        request.session["quantities"].pop(id)
-        request.session["total_price"] -= request.session["quantities_prices"].pop(id)
+        product = request.session["products"].pop(id)
+        request.session['total_price'] -= product[3]  # Subtract the quantity_price
     except IndexError:
         pass  # Handle index errors if necessary
 
     return redirect('recipt:index')
+
 def edit_customer(request, customer_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("recipt:login"))
@@ -147,32 +132,30 @@ def edit_customer(request, customer_name):
         customer_form.for_edit_customer(customer_name)
         return render(request, 'recipt/edit_customer.html', {"customer_form": customer_form, "customer_name": customer_name})
 
-
-
-
 def edit_product(request, id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("recipt:login"))
 
     try:
-        name = request.session["names"][id]
-        price = request.session["prices"][id]
-        quantity = request.session["quantities"][id]
+        product = request.session["products"][id]
+        name, quantity, price, quantity_price = product
     except IndexError:
         return redirect('recipt:index')  # Redirect if invalid ID
 
     if request.method == 'POST':
         form = NewDataForm(request.POST)
-
         if form.is_valid():
             # Update session data
-            request.session["names"][id] = form.cleaned_data['name']
-            request.session["prices"][id] = form.cleaned_data['price']
-            request.session["quantities"][id] = form.cleaned_data['quantity']
-            request.session['quantities_prices'][id] = form.cleaned_data['price'] * form.cleaned_data['quantity']
+            new_name = form.cleaned_data['name']
+            new_price = form.cleaned_data['price']
+            new_quantity = form.cleaned_data['quantity']
+            new_quantity_price = new_price * new_quantity
+
+            # Update the product
+            request.session["products"][id] = [new_name, new_quantity, new_price, new_quantity_price]
 
             # Recalculate total price
-            request.session['total_price'] = sum(q * p for q, p in zip(request.session["quantities"], request.session["prices"]))
+            request.session['total_price'] = sum(p[3] for p in request.session["products"])
 
             return redirect('recipt:index')
     else:
@@ -180,8 +163,6 @@ def edit_product(request, id):
         form.for_edit_product(name, price, quantity)
 
     return render(request, 'recipt/add.html', {"form": form, 'is_editing': True, 'id': id})
-
-
 
 def login_view(request):
     if request.method == "POST":

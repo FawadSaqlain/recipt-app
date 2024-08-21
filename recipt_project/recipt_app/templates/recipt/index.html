@@ -14,57 +14,49 @@
             <div>
                 <ol>
                     <br>
-                    {% if names %}
-                    <h3>Name</h3>
-                    {% endif %}
-                    {% for name in names %}
-                    <li style="margin-left: 15px;">{{ name }}</li>
+                    {% if products %}
+                    <h3>Product Name</h3>
+                    {% for product in products %}
+                    <li style="margin-left: 15px;">{{ product.0 }}</li> <!-- Display product name -->
                     <br>
-                    {% empty %}
-                    <h1>No items added</h1>
                     {% endfor %}
+                    {% else %}
+                    <h1>No items added</h1>
+                    {% endif %}
                 </ol>
             </div>
 
             <div class="receipt-section">
                 <br>
-                {% if quantities %}
+                {% if products %}
                 <h3>Quantity</h3>
-                {% endif %}
-                {% for quantity in quantities %}
-                {{ quantity }}
+                {% for product in products %}
+                {{ product.1 }} <!-- Display quantity -->
                 <br><br>
                 {% endfor %}
+                {% endif %}
             </div>
 
             <div class="receipt-section">
                 <br>
-                {% if prices %}
+                {% if products %}
                 <h3>Price</h3>
-                {% endif %}
-                {% for price in prices %}
-                {{ price }}
+                {% for product in products %}
+                {{ product.2 }} <!-- Display price -->
                 <br><br>
                 {% endfor %}
-            </div>
-
-            <div class="receipt-section">
-                <br>
-                {% if prices %}
-                X
-                <br><br>
                 {% endif %}
             </div>
 
             <div class="receipt-section">
                 <br>
-                {% if prices %}
-                <h4>Total</h4>
-                {% endif %}
-                {% for quantity_price in quantities_prices %}
-                {{ quantity_price }}
+                {% if products %}
+                <h3>Total for Each Item</h3>
+                {% for product in products %}
+                {{ product.3 }} <!-- Display quantity_price -->
                 <br><br>
                 {% endfor %}
+                {% endif %}
             </div>
 
             <div class="receipt-actions">
@@ -94,11 +86,12 @@
         <a href="{% url 'recipt:add' %}" class="action-button">Add New Item</a>
         <button onclick="printReceipt()" class="action-button print-button">Print Receipt</button>
         <!-- Example button/link in HTML template -->
-<a href="{% url 'recipt:edit_customer' customer_name %}" class="edit-button">
-    <img src="https://th.bing.com/th/id/OIP.P6trHImFdjGgSXQBU7_sagHaHa?rs=1&pid=ImgDetMain" alt="EDIT"
-        style="width: 15px; height: 20px; margin-bottom: 10px; margin-right: 10px;">
-</a>
-
+        {% if customer_name %}
+        <a href="{% url 'recipt:edit_customer' customer_name %}" class="edit-button">
+            <img src="https://th.bing.com/th/id/OIP.P6trHImFdjGgSXQBU7_sagHaHa?rs=1&pid=ImgDetMain" alt="EDIT"
+                style="width: 15px; height: 20px; margin-bottom: 10px; margin-right: 10px;">
+        </a>
+        {% endif %}
     </div>
 
     <script>
