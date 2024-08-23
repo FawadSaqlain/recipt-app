@@ -75,16 +75,18 @@ def add(request):
     if request.method == 'POST':
         form = NewDataForm(request.POST)
         form_customer = CustomerNameForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and form_customer.is_valid():
             name = form.cleaned_data['name']
             price = form.cleaned_data['price']
             quantity = form.cleaned_data['quantity']
             quantity_price = price * quantity
             request.session["products"].append([name, quantity, price, quantity_price])
             request.session['total_price'] += quantity_price
-            if form_customer.is_valid():
-                customer_name = form_customer.cleaned_data['customer_name']
+
+            customer_name = form_customer.cleaned_data['customer_name']
+            if customer_name:
                 request.session["customer_name"] = customer_name
+
             # return redirect('recipt:index')  # Redirect after adding
         else:
             return render(request, 'recipt/add.html', {'form': form, 'form_customer': form_customer})
@@ -94,10 +96,10 @@ def new_receipt(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("recipt:login"))
 
-    request.session["products"] = []  # Reset 2D product list
+    # Reset session data for a new receipt
+    request.session["products"] = []
     request.session["total_price"] = 0
-    request.session["customer_name"] = None  # Reset customer name
-
+    request.session["customer_name"] = None
     return redirect('recipt:add')
 
 def dele(request, id):
@@ -116,21 +118,16 @@ def edit_customer(request, customer_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("recipt:login"))
 
-    if not customer_name:
-        return redirect('recipt:index')  # Redirect if customer_name is not provided
-
     if request.method == 'POST':
         customer_form = CustomerNameForm(request.POST)
         if customer_form.is_valid():
             customer_name = customer_form.cleaned_data['customer_name']
             request.session['customer_name'] = customer_name
             return redirect('recipt:index')
-        else:
-            return render(request, 'recipt/edit_customer.html', {'customer_form': customer_form, 'customer_name': customer_name})
     else:
-        customer_form = CustomerNameForm()
-        customer_form.for_edit_customer(customer_name)
-        return render(request, 'recipt/edit_customer.html', {"customer_form": customer_form, "customer_name": customer_name})
+        customer_form = CustomerNameForm(initial={'customer_name': customer_name})
+
+    return render(request, 'recipt/edit_customer.html', {"customer_form": customer_form, "customer_name": customer_name})
 
 def edit_product(request, id):
     if not request.user.is_authenticated:
@@ -159,8 +156,7 @@ def edit_product(request, id):
 
             return redirect('recipt:index')
     else:
-        form = NewDataForm()
-        form.for_edit_product(name, price, quantity)
+        form = NewDataForm(initial={'name': name, 'price': price, 'quantity': quantity})
 
     return render(request, 'recipt/add.html', {"form": form, 'is_editing': True, 'id': id})
 
