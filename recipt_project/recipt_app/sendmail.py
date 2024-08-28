@@ -63,13 +63,19 @@ class EmailSupportAgent:
                 server.login(self.smtp_user, self.smtp_password)
                 server.send_message(msg)
             return "Success"
+        except smtplib.SMTPAuthenticationError as e:
+            return f"Authentication Error: {str(e)}"
+        except smtplib.SMTPConnectError as e:
+            return f"Connection Error: {str(e)}"
+        except smtplib.SMTPDataError as e:
+            return f"Data Error: {str(e)}"
         except smtplib.SMTPException as e:
-            return f"Error: {str(e)}"
+            return f"SMTP Error: {str(e)}"
         except Exception as e:
             return f"Unexpected Error: {str(e)}"
 
     def handle_incoming_email(self, email_data):
-        subject = f"{email_data['customer_name']}'s Purchase Receipt from BUGS at {email_data['now'].strftime('%B %d, %Y')}"
+        subject = f"{email_data['customer_name']}'s Purchase Receipt from BUGS at {email_data['now'].strftime('%B %d, %Y at %I:%M %p')}"
         body = self.create_receipt_body(email_data)
         return self.send_email(subject, body, email_data['customer_email'])
 

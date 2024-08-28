@@ -94,17 +94,21 @@ def sendmail(request):
     }
     
     result = viewsdata(user_data)
-
-    # Check for delivery error and redirect to edit_customer if email not found
-    if result and result.startswith("Error"):
+    print(f"result :: {result}")
+    if result.startswith("Error"):
+        # Redirect to edit_customer with the customer's name and email as URL parameters
         return redirect('recipt:edit_customer', customer_name=user_data['customer_name'], customer_email=user_data['customer_email'])
     elif result == "Success":
-        return render(request, 'recipt/redirect_popup.html', {
-            'customer_name': user_data['customer_name']
-        })
-    else:
+        # Render the redirect_popup.html template with customer details
         return render(request, 'recipt/redirect_popup.html', {
             'customer_name': user_data['customer_name'],
+            'customer_email': user_data['customer_email']
+        })
+    else:
+        # Render the redirect_popup.html template with an error message
+        return render(request, 'recipt/redirect_popup.html', {
+            'customer_name': user_data['customer_name'],
+            'customer_email': user_data['customer_email'],
             'error': 'An unexpected issue occurred while sending the email.'
         })
 def add(request):
