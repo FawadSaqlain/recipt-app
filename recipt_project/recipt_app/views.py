@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from datetime import datetime
+from .sendmail import viewsdata
 
 class NewDataForm(forms.Form):
     def for_edit_product(self, nam, pric, quant, *args, **kwargs):
@@ -36,14 +37,23 @@ class NewDataForm(forms.Form):
         })
     )
 
-class CustomerNameForm(forms.Form):
-    def for_edit_customer(self, customer_name, *args, **kwargs):
+class CustomerForm(forms.Form):
+    def for_edit_customer(self, customer_name, customer_email, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['customer_name'].initial = customer_name
+        self.fields['customer_email'].initial = customer_email
 
     customer_name = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
+            'placeholder': 'Customer name',
+            'class': 'form-control',
+            'style': 'width: 100%; padding: 10px; margin-bottom: 10px;',
+        })
+    )
+    customer_email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={
             'placeholder': 'Customer name',
             'class': 'form-control',
             'style': 'width: 100%; padding: 10px; margin-bottom: 10px;',
@@ -60,21 +70,50 @@ def index(request):
         request.session["total_price"] = 0
     if "customer_name" not in request.session:
         request.session["customer_name"] = None
+    if "customer_email" not in request.session:
+        request.session["customer_email"] = None
 
     return render(request, 'recipt/index.html', {
         "products": request.session["products"],
         "total_price": request.session["total_price"],
         "customer_name": request.session["customer_name"],
+        "customer_email": request.session["customer_email"],
         'range_5': range(len(request.session["products"])),
         'now': datetime.now()
     })
+def sendmail(request):
+    user_data = {
+        'username': request.user.username,
+        'first_name': request.user.first_name,
+        'last_name': request.user.last_name,
+        'products': request.session.get("products"),
+        'total_price': request.session.get("total_price"),
+        'customer_name': request.session.get("customer_name"),
+        'customer_email': request.session.get("customer_email"),
+        'now': datetime.now()
+    }
+    
+    result = viewsdata(user_data)
 
+    # Check for delivery error and redirect to edit_customer if email not found
+    if result and result.startswith("Error"):
+        return redirect('recipt:edit_customer', customer_name=user_data['customer_name'], customer_email=user_data['customer_email'])
+    elif result == "Success":
+        return render(request, 'recipt/redirect_popup.html', {
+            'customer_name': user_data['customer_name']
+        })
+    else:
+        return render(request, 'recipt/redirect_popup.html', {
+            'customer_name': user_data['customer_name'],
+            'error': 'An unexpected issue occurred while sending the email.'
+        })
 def add(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("recipt:login"))
+    
     if request.method == 'POST':
         form = NewDataForm(request.POST)
-        form_customer = CustomerNameForm(request.POST)
+        form_customer = CustomerForm(request.POST)
         if form.is_valid() and form_customer.is_valid():
             name = form.cleaned_data['name']
             price = form.cleaned_data['price']
@@ -84,13 +123,15 @@ def add(request):
             request.session['total_price'] += quantity_price
 
             customer_name = form_customer.cleaned_data['customer_name']
+            customer_email = form_customer.cleaned_data['customer_email']
             if customer_name:
                 request.session["customer_name"] = customer_name
+            if customer_email:
+                request.session["customer_email"] = customer_email
 
-            # return redirect('recipt:index')  # Redirect after adding
         else:
             return render(request, 'recipt/add.html', {'form': form, 'form_customer': form_customer})
-    return render(request, 'recipt/add.html', {"form": NewDataForm(), 'form_customer': CustomerNameForm()})
+    return render(request, 'recipt/add.html', {"form": NewDataForm(), 'form_customer': CustomerForm()})
 
 def new_receipt(request):
     if not request.user.is_authenticated:
@@ -100,6 +141,7 @@ def new_receipt(request):
     request.session["products"] = []
     request.session["total_price"] = 0
     request.session["customer_name"] = None
+    request.session["customer_email"] = None
     return redirect('recipt:add')
 
 def dele(request, id):
@@ -114,20 +156,22 @@ def dele(request, id):
 
     return redirect('recipt:index')
 
-def edit_customer(request, customer_name):
+def edit_customer(request, customer_name, customer_email):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("recipt:login"))
 
     if request.method == 'POST':
-        customer_form = CustomerNameForm(request.POST)
+        customer_form = CustomerForm(request.POST)
         if customer_form.is_valid():
             customer_name = customer_form.cleaned_data['customer_name']
+            customer_email = customer_form.cleaned_data['customer_email']
             request.session['customer_name'] = customer_name
+            request.session['customer_email'] = customer_email
             return redirect('recipt:index')
     else:
-        customer_form = CustomerNameForm(initial={'customer_name': customer_name})
+        customer_form = CustomerForm(initial={'customer_name': customer_name, 'customer_email': customer_email})
 
-    return render(request, 'recipt/edit_customer.html', {"customer_form": customer_form, "customer_name": customer_name})
+    return render(request, 'recipt/edit_customer.html', {"customer_form": customer_form, "customer_name": customer_name, "customer_email": customer_email})
 
 def edit_product(request, id):
     if not request.user.is_authenticated:
