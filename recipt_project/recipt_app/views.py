@@ -92,9 +92,10 @@ def sendmail(request):
         'customer_email': request.session.get("customer_email"),
         'now': datetime.now()
     }
-    
+
     result = viewsdata(user_data)
-    print(f"result :: {result}")
+    print(f"Result from viewsdata: {result}")  # Log the result for debugging
+
     if result.startswith("Error"):
         # Redirect to edit_customer with the customer's name and email as URL parameters
         return redirect('recipt:edit_customer', customer_name=user_data['customer_name'], customer_email=user_data['customer_email'])

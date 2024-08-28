@@ -1,5 +1,6 @@
 import smtplib
 from email.mime.text import MIMEText
+from datetime import datetime
 
 class EmailSupportAgent:
     def __init__(self, smtp_server, smtp_port, smtp_user, smtp_password):
