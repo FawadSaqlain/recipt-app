@@ -1,8 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django import forms
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from datetime import datetime
 from .sendmail import viewsdata
@@ -82,6 +81,8 @@ def index(request):
         'now': datetime.now()
     })
 def sendmail(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("recipt:login"))
     user_data = {
         'username': request.user.username,
         'first_name': request.user.first_name,

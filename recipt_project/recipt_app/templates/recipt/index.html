@@ -3,27 +3,46 @@
 {% block body %}
 <div>
     <div id="receipt-content">
-        {% if not customer_name %}
-            {% if request.user.first_name and request.user.last_name %}
-                <h3>Here is your receipt by {{ request.user.first_name }} {{ request.user.last_name }}</h3>
-            {% else %}
-                <h3>Here is your receipt by {{ request.user.username }}</h3>
-            {% endif %}
-        {% else %}
-            {% if request.user.first_name and request.user.last_name %}
-                <h3>Here is {{ customer_name }}'s receipt by {{ request.user.first_name }} {{ request.user.last_name }}</h3>
-            {% else %}
-                <h3>Here is {{ customer_name }}'s receipt by {{ request.user.username }}</h3>
-            {% endif %}
-        {% endif %}
-        <h6 class="receipt-date" style="margin-top: -20px;">{{ now }}</h6>
+        <div style="display: flex; justify-content: space-between;">
+            <div>
+                {% if not customer_name %}
+                    {% if request.user.first_name and request.user.last_name %}
+                        <h3>Here is your receipt by {{ request.user.first_name }} {{ request.user.last_name }}</h3>
+                    {% else %}
+                        <h3>Here is your receipt by {{ request.user.username }}</h3>
+                    {% endif %}
+                {% else %}
+                    {% if request.user.first_name and request.user.last_name %}
+                        <h3>Here is {{ customer_name }}'s receipt by {{ request.user.first_name }} {{ request.user.last_name }}
+                            {% if customer_name %}
+                                <a href="{% url 'recipt:edit_customer' customer_name customer_email %}" class="edit-button">
+                                    <img src="https://th.bing.com/th/id/OIP.P6trHImFdjGgSXQBU7_sagHaHa?rs=1&pid=ImgDetMain" alt="EDIT"
+                                         style="width: 15px; height: 20px; margin-left: 10px;">
+                                </a>
+                            {% endif %}
+                        </h3>
+                    {% else %}
+                        <h3>Here is {{ customer_name }}'s receipt by {{ request.user.username }}
+                            {% if customer_name %}
+                                <a href="{% url 'recipt:edit_customer' customer_name customer_email %}" class="edit-button">
+                                    <img src="https://th.bing.com/th/id/OIP.P6trHImFdjGgSXQBU7_sagHaHa?rs=1&pid=ImgDetMain" alt="EDIT"
+                                         style="width: 15px; height: 20px; margin-left: 10px;">
+                                </a>
+                            {% endif %}
+                        </h3>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <h6 class="receipt-date">{{ now }}</h6>
+        </div>
 
         <div id="index_outer_div" class="receipt-details">
             <div>
                 <ol>
                     <br>
+                    
                     {% if products %}
-                        <h3>Product Name</h3>
+                        <h3 style="margin-top: 8px;">Product Name</h3>
                         {% for product in products %}
                             <li style="margin-left: 15px;">{{ product.0 }}</li>
                             <br>
@@ -91,15 +110,9 @@
 
     <div class="actions">
         <a href="{% url 'recipt:new_receipt' %}" class="action-button">New Receipt</a>
-        <a href="{% url 'recipt:sendmail' %}" class="action-button">send mail</a>
+        <a href="{% url 'recipt:sendmail' %}" class="action-button">E.recipt</a>
         <a href="{% url 'recipt:add' %}" class="action-button">Add New Item</a>
         <button onclick="printReceipt()" class="action-button print-button">Print Receipt</button>
-        {% if customer_name %}
-            <a href="{% url 'recipt:edit_customer' customer_name customer_email %}" class="edit-button">
-                <img src="https://th.bing.com/th/id/OIP.P6trHImFdjGgSXQBU7_sagHaHa?rs=1&pid=ImgDetMain" alt="EDIT"
-                     style="width: 15px; height: 20px; margin-bottom: 10px; margin-right: 10px;">
-            </a>
-        {% endif %}
     </div>
 
     <script>
